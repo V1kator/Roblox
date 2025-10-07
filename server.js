@@ -6,7 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // SUBSTITUA abaixo pela sua URI do MongoDB Atlas:
-const uri = process.env.MONGODB_URI;
+const uri = 'mongodb+srv://admin:admin123@cluster0.780yk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 
 app.use(express.static(__dirname));
