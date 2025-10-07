@@ -1,47 +1,54 @@
 const express = require("express");
-const fs = require("fs");
+const { MongoClient } = require("mongodb");
 const path = require("path");
+require("dotenv").config();
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-app.use(express.static(__dirname)); // Servir arquivos da pasta atual
-app.use(express.json()); // Permitir JSON no body da requisição
+// SUBSTITUA abaixo pela sua URI do MongoDB Atlas:
+const uri = process.env.MONGODB_URI;
 
-app.post("/login", (req, res) => {
+
+app.use(express.static(__dirname));
+app.use(express.json());
+
+let db;
+
+// Conectar ao MongoDB Atlas
+MongoClient.connect(uri, { useUnifiedTopology: true })
+    .then(client => {
+        db = client.db("loginDB"); // nome do banco
+        console.log("✅ Conectado ao MongoDB Atlas");
+
+        app.listen(PORT, () => {
+            console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+        });
+    })
+    .catch(err => {
+        console.error("❌ Erro ao conectar ao MongoDB:", err);
+    });
+
+// Rota para salvar login no MongoDB
+app.post("/login", async (req, res) => {
     const { usuario, senha } = req.body;
 
-    const novoLogin = {
-        usuario,
-        senha,
-        data: new Date().toISOString(),
-    };
+    if (!usuario || !senha) {
+        return res.status(400).send("Dados incompletos.");
+    }
 
-    const arquivo = path.join(__dirname, "usuarios.json");
+    try {
+        const collection = db.collection("logins"); // nome da coleção
+        const novoLogin = {
+            usuario,
+            senha,
+            data: new Date(),
+        };
 
-    fs.readFile(arquivo, "utf8", (err, data) => {
-        let usuarios = [];
+        await collection.insertOne(novoLogin);
 
-        if (!err && data) {
-            try {
-                usuarios = JSON.parse(data);
-            } catch (e) {
-                console.error("Erro ao fazer parse:", e);
-            }
-        }
-
-        usuarios.push(novoLogin);
-
-        fs.writeFile(arquivo, JSON.stringify(usuarios, null, 2), (err) => {
-            if (err) {
-                console.error("Erro ao salvar:", err);
-                return res.status(500).send("Erro ao salvar.");
-            }
-
-            res.status(200).send("Salvo com sucesso.");
-        });
-    });
-});
-
-app.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
+        res.status(200).send("Login salvo no MongoDB!");
+    } catch (err) {
+        console.error("Erro ao salvar no MongoDB:", err);
+        res.status(500).send("Erro ao salvar no banco de dados.");
+    }
 });
